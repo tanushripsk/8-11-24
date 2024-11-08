@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 mongoose.connect(
-  "mongodb://nagpurdial_nagpurdialpsk:2HUqJfIWlZ@157.173.119.93:27017/nagpurdial_NagpurDial1?authSource=admin",
+  "mongodb+srv://vyomidada:zSOQeNxQBM0BlBLM@cluster0.hzhmx.mongodb.net/",
   {
     // useNewUrlParser: true,
     // useUnifiedTopology: true,
