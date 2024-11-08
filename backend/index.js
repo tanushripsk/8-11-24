@@ -1,7 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const multer = require("multer");
+const path = require("path");
 const cors = require("cors");
-const path = require('path');
 const bodyParser = require("body-parser");
 const Locations = require("./models/Locations");
 var jwt = require("jsonwebtoken");
@@ -9,17 +10,18 @@ const jwt_key = "gayatrimam@123";
 
 const app = express();
 
-// Middleware
-// app.use(
-//   cors({
-//     origin: "*", // Allow all origins
-//   })
-// );
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, '../build')));
+const buildpath = path.join(__dirname, "../build");
+app.use(express.static(buildpath));
 
-// MongoDB connection
+// Middleware
+app.use(
+  cors({
+    origin: "*", // Allow all origins
+  })
+);
+app.use(express.json());
+app.use(bodyParser.json());
+
 mongoose.connect(
   "mongodb://nagpurdial_nagpurdialpsk:2HUqJfIWlZ@157.173.119.93:27017/nagpurdial_NagpurDial1?authSource=admin",
   {
@@ -30,9 +32,25 @@ mongoose.connect(
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
+// Multer setup
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    cb(
+      null,
+      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+    );
+  },
+});
+
+const upload = multer({ storage: storage });
+
 // Routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/notes", require("./routes/notes"));
+app.use("/api/freelisting", require("./routes/freelisting"));
 
 // Routes for search by locations
 app.post("/api/search", async (req, res) => {
@@ -68,36 +86,6 @@ app.post("/api/location", async (req, res) => {
   }
 });
 
-// Schema for login
-const userSchema = new mongoose.Schema({
-  email: String,
-  number: String,
-});
-const User = mongoose.model("User", userSchema);
-
-// Login route
-app.post("/login", async (req, res) => {
-  try {
-    const { email, number } = req.body;
-    if (!email || !number) {
-      return res.status(400).send("Email and number are required");
-    }
-    const user = await User.findOne({ email, number });
-    if (!user) {
-      return res.status(401).send("Invalid email or number");
-    }
-    res.status(200).send("Login successful");
-  } catch (error) {
-    console.error("Error during login:", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-// Handle React routing
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../build', 'index.html'));
-});
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error("Error during request:", err);
@@ -106,5 +94,5 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 30000;
 app.listen(PORT, () => {
-  console.log(`Server is running on Port:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
