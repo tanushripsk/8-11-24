@@ -93,12 +93,10 @@ app.post("/login", async (req, res) => {
   }
 });
 
-
 // Handle React routing
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });
-
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -108,5 +106,5 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 30000;
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on Port:${PORT}`);
 });
